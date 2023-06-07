@@ -1,6 +1,7 @@
 #pragma warning disable CS1591
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
@@ -54,9 +55,15 @@ namespace Emby.Server.Implementations.LiveTv.TunerHosts
             var typeName = GetType().Name;
             Logger.LogInformation("Opening {StreamType} Live stream from {Url}", typeName, url);
 
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            foreach (KeyValuePair<string, string> header in mediaSource.RequiredHttpHeaders)
+            {
+                requestMessage.Headers.Add(header.Key, header.Value);
+            }
+
             // Response stream is disposed manually.
             var response = await _httpClientFactory.CreateClient(NamedClient.Default)
-                .GetAsync(url, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+                .SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
                 .ConfigureAwait(false);
 
             var contentType = response.Content.Headers.ContentType?.ToString() ?? string.Empty;

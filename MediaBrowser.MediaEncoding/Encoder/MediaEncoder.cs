@@ -429,6 +429,7 @@ namespace MediaBrowser.MediaEncoding.Encoder
                 GetInputArgument(request.MediaSource.Path, request.MediaSource),
                 request.MediaSource.Path,
                 request.MediaSource.Protocol,
+                request.MediaSource.RequiredHttpHeaders,
                 extractChapters,
                 analyzeDuration,
                 request.MediaType == DlnaProfileType.Audio,
@@ -470,16 +471,32 @@ namespace MediaBrowser.MediaEncoding.Encoder
             string inputPath,
             string primaryPath,
             MediaProtocol protocol,
+            Dictionary<string, string> requestHeaders,
             bool extractChapters,
             string probeSizeArgument,
             bool isAudio,
             VideoType? videoType,
             CancellationToken cancellationToken)
         {
+            var headers = string.Empty;
+            var userAgent = string.Empty;
+            if (requestHeaders.TryGetValue("User-Agent", out userAgent))
+            {
+                requestHeaders.Remove("User-Agent");
+                headers = $"-user_agent \"{userAgent}\" ";
+            }
+
+            // Additional headers
+            // if (requestHeaders.Count > 0)
+            // {
+            //     headers += "-headers '" + string.Join("\\r\\n", requestHeaders.Select(header => $"{header.Key}:{header.Value}")) + "\\r\\n'";
+            // }
+
             var args = extractChapters
-                ? "{0} -i {1} -threads {2} -v warning -print_format json -show_streams -show_chapters -show_format"
-                : "{0} -i {1} -threads {2} -v warning -print_format json -show_streams -show_format";
-            args = string.Format(CultureInfo.InvariantCulture, args, probeSizeArgument, inputPath, _threads).Trim();
+                ? "{0} {1} -i {2} -threads {3} -v warning -print_format json -show_streams -show_chapters -show_format"
+                : "{0} {1} -i {2} -threads {3} -v warning -print_format json -show_streams -show_format";
+
+            args = string.Format(CultureInfo.InvariantCulture, args, probeSizeArgument, headers, inputPath, _threads).Trim();
 
             var process = new Process
             {
