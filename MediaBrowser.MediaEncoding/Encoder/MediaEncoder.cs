@@ -487,10 +487,10 @@ namespace MediaBrowser.MediaEncoding.Encoder
             }
 
             // Additional headers
-            // if (requestHeaders.Count > 0)
-            // {
-            //     headers += "-headers '" + string.Join("\\r\\n", requestHeaders.Select(header => $"{header.Key}:{header.Value}")) + "\\r\\n'";
-            // }
+            if (requestHeaders.Count > 0)
+            {
+                headers += "-headers $'" + string.Join("\\r\\n", requestHeaders.Select(header => $"{header.Key}:{header.Value}")) + "\\r\\n'";
+            }
 
             var args = extractChapters
                 ? "{0} {1} -i {2} -threads {3} -v warning -print_format json -show_streams -show_chapters -show_format"
