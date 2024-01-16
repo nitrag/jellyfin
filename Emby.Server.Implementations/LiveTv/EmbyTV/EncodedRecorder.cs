@@ -164,6 +164,16 @@ namespace Emby.Server.Implementations.LiveTv.EmbyTV
                 inputModifier += " -fflags " + string.Join(string.Empty, flags);
             }
 
+            if (mediaSource.RequiredHttpHeaders != null)
+            {
+                var userAgent = string.Empty;
+                if (mediaSource.RequiredHttpHeaders.TryGetValue("User-Agent", out userAgent))
+                {
+                    mediaSource.RequiredHttpHeaders.Remove("User-Agent");
+                    inputModifier += $"-user_agent \"{userAgent}\" ";
+                }
+            }
+
             if (mediaSource.ReadAtNativeFramerate)
             {
                 inputModifier += " -re";
@@ -178,6 +188,8 @@ namespace Emby.Server.Implementations.LiveTv.EmbyTV
             var analyzeDuration = " -analyzeduration " +
                   (analyzeDurationSeconds * 1000000).ToString(CultureInfo.InvariantCulture);
             inputModifier += analyzeDuration;
+
+            inputModifier += "-http_proxy http://192.168.156.160:8888/ ";
 
             var subtitleArgs = CopySubtitles ? " -codec:s copy" : " -sn";
 

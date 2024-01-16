@@ -1641,6 +1641,8 @@ public class DynamicHlsController : BaseJellyfinApiController
                 Path.GetFileNameWithoutExtension(outputPath));
         }
 
+        var userAgent = _encodingHelper.GetUserAgentParam(state);
+
         return string.Format(
             CultureInfo.InvariantCulture,
             "{0} {1} -map_metadata -1 -map_chapters -1 -threads {2} {3} {4} {5} -copyts -avoid_negative_ts disabled -max_muxing_queue_size {6} -f hls -max_delay 5000000 -hls_time {7} -hls_segment_type {8} -start_number {9}{10} -hls_segment_filename \"{12}\" -hls_playlist_type {11} -hls_list_size 0 -y \"{13}\"",
